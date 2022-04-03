@@ -15,6 +15,8 @@ We wanted to make the opponent "smart", forcing the player to change strategies 
 - If Baby correctly judged that your guess is included/not included in the 6 cards, it gets *6-x* points.
 - If not, you get *x* points.
 
+![alt text](assets/gameplay.png)
+
 ## How to play
 ### Dependencies
 ```
