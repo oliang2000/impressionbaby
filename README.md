@@ -15,6 +15,25 @@ We wanted to make the opponent "smart", forcing the player to change strategies 
 - If Baby correctly judged that your guess is included/not included in the 6 cards, it gets *6-x* points.
 - If not, you get *x* points.
 
+## How to play
+### Dependencies
+```
+pip install keras-rl2
+Pip install h5py
+pip install gym
+pip3 install -U pyxel
+```
+### Run
+- UI with Pyxel
+```
+python3 GameUI.py
+```
+- Command line
+```
+python3 BS_Poker.py
+```
+
+
 ## What's next
 - More complex game rules (claim could include flush, full house, etc)
 - Each round Baby gets to return a higher claim instead of simply saying True or False
