@@ -7,6 +7,9 @@ class BSGame:
         self.deck = [(card, suit) for card in CARDS for suit in SUITS]
         self.__player1_cards = None
         self.__player2_cards = None
+        self.claim_type = 0
+        self.claim_card = None
+        self.claim_quantity = None
 
     def draw_from_deck_wo_replacement(self, n_draw):
         newdeck = []
@@ -27,21 +30,22 @@ class BSGame:
     def get_player2_hands(self):
         return self.__player2_cards
 
-    def play_bs(self, claim_card, claim_quantity, claim_type):
+    def play_bs(self):
         '''
         Strategy for guessing True or False.
         '''
-        if claim_type == 0:
+
+        if self.claim_type == 1:
             #if player 2 has the claimed card(s)
             n_player2_have = 0
             for card, suit in self.__player2_cards:
-                if (card == claim_card) or (card == 2):
+                if (card == self.claim_card) or (card == 2):
                     n_player2_have += 1
-            if claim_quantity <= n_player2_have:
+            if self.claim_quantity <= n_player2_have:
                 return True
             #else guess by probability
             else:
-                n_cards_needed = claim_quantity-n_player2_have
+                n_cards_needed = self.claim_quantity-n_player2_have
                 possibility = 1
                 i = 0
                 while i < n_cards_needed:
@@ -50,17 +54,17 @@ class BSGame:
                 if possibility > 0.1: 
                     return True
 
-        elif claim_type == 1:
+        elif self.claim_type == 2:
             #if player 2 has the claimed card(s)
             n_player2_have = 0
             for card, suit in self.__player2_cards:
-                if (suit == claim_card) or (card == 2):
+                if (suit == self.claim_card) or (card == 2):
                     n_player2_have += 1
-            if claim_quantity <= n_player2_have:
+            if self.claim_quantity <= n_player2_have:
                 return True
             #else guess by probability
             else:
-                n_cards_needed = claim_quantity-n_player2_have
+                n_cards_needed = self.claim_quantity-n_player2_have
                 possibility = 1
                 i = 0
                 while i < n_cards_needed:
@@ -72,19 +76,19 @@ class BSGame:
         return False ##
 
 
-    def judge_bs(self, claim_card, claim_quantity, claim_type):
+    def judge_bs(self):
         '''
         Judge if claim is right.
         '''
         number_of_claim_card = 0
         for card, suit in self.__player1_cards + self.__player2_cards:
-            if claim_type == 0:
-                if (card == claim_card) or (card == 2):
+            if self.claim_type == 1:
+                if (card == self.claim_card) or (card == 2):
                     number_of_claim_card += 1
             else:
-                if (suit == claim_card) or (card == 2):
+                if (suit == self.claim_card) or (card == 2):
                     number_of_claim_card += 1
-            if claim_quantity == number_of_claim_card:
+            if self.claim_quantity == number_of_claim_card:
                 return True
         return False
 
@@ -105,12 +109,13 @@ def play_one_round():
     #ask for claim card
     while True:
         try:
-            claim_type = int(input("Card (0) or Suit(1): "))
+            input_claim_type = int(input("Card (1) or Suit(2): "))
         except ValueError:
             print("Invalid value.")
             continue
         else:
-            if (claim_type == 0) or (claim_type == 1):
+            if (input_claim_type == 1) or (input_claim_type == 2):
+                new_game.claim_type = input_claim_type
                 break
             else:
                 print("Invalid value.")
@@ -118,12 +123,12 @@ def play_one_round():
     while True:
         inv_dict = INV_SUITS_DICT
         input_q = "Suit(HEART/CLUB/DIAMOND/SPADE): "
-        if claim_type == 0:
+        if new_game.claim_type == 1:
             inv_dict = INV_CARDS_DICT
             input_q = "Card (A23456789JQK): "
         try:
-            claim_card_input = input(input_q).upper()
-            claim_card = inv_dict[claim_card_input]
+            input_claim_card = input(input_q).upper()
+            new_game.claim_card = inv_dict[input_claim_card]
         except KeyError:
             print("Invalid value.")
             continue
@@ -133,18 +138,19 @@ def play_one_round():
     #ask for claim number
     while True:
         try:
-            claim_quantity = int(input("Quantity of {}s (1-6): ".format(claim_card_input)))
+            input_claim_quantity = int(input("Quantity of {}s (1-6): ".format(input_claim_card)))
         except ValueError:
             print("Invalid value.")
             continue
         else:
-            if (claim_quantity > 6) or (claim_quantity <= 0):
+            if (input_claim_quantity > 6) or (input_claim_quantity <= 0):
                 print("Invalid value.")
             else:
+                new_game.claim_quantity = input_claim_quantity
                 break
 
     #player 2 judges
-    player2_move = new_game.play_bs(claim_card, claim_quantity, claim_type)
+    player2_move = new_game.play_bs()
     print('\nPlayer 2 thinks its', str(player2_move))
 
     #show hands
@@ -152,14 +158,14 @@ def play_one_round():
     print(new_game)
 
     #result
-    result = new_game.judge_bs(claim_card, claim_quantity, claim_type)
+    result = new_game.judge_bs()
     if result == player2_move:
         score1 = 0
-        score2 = 6 - claim_quantity
+        score2 = 6 - new_game.claim_quantity
         print('\nPlayer 2 wins {} points!'.format(score2))
 
     else:
-        score1 = claim_quantity
+        score1 = new_game.claim_quantity
         score2 = 0
         print('\nPlayer 1 wins {} points!'.format(score1))
     print('\n\n')
