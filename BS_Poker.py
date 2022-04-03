@@ -2,70 +2,57 @@ import random
 from nn import baby, make_and_verify_guess # :)
 from tensorflow.keras.optimizers import Adam
 import numpy as np
+import util
+from util import CARDS, CARDS_DICT, INV_CARDS_DICT, SUITS, SUITS_DICT, INV_SUITS_DICT
 
 
-cards = list(range(1, 14))
-cards_dict = {1:'A', 2:'2', 3:'3', 4:'4', 5:'5', 6: '6', 7: '7', 8: '8', 9:'9', 10:'10', 11:'J', 12:'Q', 13:'K'}
-inv_cards_dict = {v: k for k, v in cards_dict.items()}
-
-suits = list(range(3))
-suits_dict = {0: 'HEART', 1: 'CLUB', 2:'DIAMOND', 3:'SPADE'}
-inv_suits_dict = {v: k for k, v in suits_dict.items()}
-
-
-def cards_to_str(cards):
-    '''
-    String of cards in tuple
-    '''
-    s = ''
-    for card, suit in cards:
-        s += '{} of {}'.format(cards_dict[card], suits_dict[suit]) + '\n'
-    return s
-
-
-class Cards:
-    def __init__(self, n_draw):
-        self.deck = [(card, suit) for card in cards for suit in suits]
-        self.n_draw = n_draw
+class BSGame:
+    def __init__(self):
+        self.deck = [(card, suit) for card in CARDS for suit in SUITS]
         self.__player1_cards = None
         self.__player2_cards = None
+        self.claim_type = 0
+        self.claim_card = None
+        self.claim_quantity = None
 
-
-    def draw_from_deck_wo_replacement(self):
+    def draw_from_deck_wo_replacement(self, n_draw):
         newdeck = []
-        for i in range(self.n_draw):
+        for i in range(n_draw):
             index = random.randint(0, len(self.deck)-1)
             card = self.deck[index]
             self.deck.pop(index)
             newdeck.append(card)
         return newdeck
 
-    def deal(self):
-        self.__player1_cards = self.draw_from_deck_wo_replacement()
-        self.__player2_cards = self.draw_from_deck_wo_replacement()
+    def deal(self, n_draw):
+        self.__player1_cards = self.draw_from_deck_wo_replacement(n_draw)
+        self.__player2_cards = self.draw_from_deck_wo_replacement(n_draw)
 
-    def show_player1_hands(self):
-        print(cards_to_str(self.__player1_cards))
+    def get_player1_hands(self):
+        return self.__player1_cards
 
-    def play_bs(self, claim_card, claim_quantity, claim_type, agent):
-        claim = np.array([claim_type, claim_card,claim_quantity])
+    def get_player2_hands(self):
+        return self.__player2_cards
+
+    def play_bs(self, agent):
+        claim = np.array([self.claim_type, self.claim_card, self.claim_quantity])
         agent, guess = make_and_verify_guess(self.__player1_cards,self.__player2_cards,claim,agent)
 
         return agent, guess
 
-    def judge_bs(self, claim_card, claim_quantity, claim_type):
+    def judge_bs(self):
         '''
         Judge if claim is right.
         '''
         number_of_claim_card = 0
         for card, suit in self.__player1_cards + self.__player2_cards:
-            if claim_type == 0:
-                if (card == claim_card) or (card == 2):
+            if self.claim_type == 1:
+                if (card == self.claim_card) or (card == 2):
                     number_of_claim_card += 1
             else:
-                if (suit == claim_card) or (card == 2):
+                if (suit == self.claim_card) or (card == 2):
                     number_of_claim_card += 1
-            if claim_quantity == number_of_claim_card:
+            if self.claim_quantity == number_of_claim_card:
                 return True
         return False
 
@@ -77,10 +64,10 @@ def play_one_round(agent):
     '''
     One round of guessing.
     '''
-    new_cards = Cards(3)
-    new_cards.deal()
+    new_game = BSGame()
+    new_game.deal(3)
     print("Your hand:")
-    new_cards.show_player1_hands()
+    print(util.cards_to_str(new_game.get_player1_hands()))
 
     print('Enter your claim')
     #ask for claim card
@@ -97,10 +84,10 @@ def play_one_round(agent):
                 print("Invalid value.")
 
     while True:
-        inv_dict = inv_suits_dict
+        inv_dict = INV_SUITS_DICT
         input_q = "Suit(HEART/CLUB/DIAMOND/SPADE): "
         if claim_type == 0:
-            inv_dict = inv_cards_dict
+            inv_dict = INV_CARDS_DICT
             input_q = "Card (A23456789JQK): "
         try:
             claim_card_input = input(input_q).upper()
@@ -125,15 +112,15 @@ def play_one_round(agent):
                 break
 
     #player 2 judges
-    agent, player2_move = new_cards.play_bs(claim_card, claim_quantity, claim_type, agent)
+    agent, player2_move = new_game.play_bs(agent)
     print('\nPlayer 2 thinks its', str(player2_move))
 
     #show hands
     print('\nShow all cards:')
-    print(new_cards)
+    print(new_game)
 
     #result
-    result = new_cards.judge_bs(claim_card, claim_quantity, claim_type)
+    result = new_game.judge_bs(claim_card, claim_quantity, claim_type)
     if result == player2_move:
         score1 = 0
         score2 = 6 - claim_quantity

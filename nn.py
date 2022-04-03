@@ -12,7 +12,7 @@ from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
 from env import cardenv
-from card_generator import input_user_claim, generate_hand
+
 
 class baby():
     def __init__(self):
