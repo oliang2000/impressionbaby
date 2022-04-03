@@ -11,13 +11,11 @@ from rl.agents.dqn import DQNAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
-from env import cardenv
+from env import Cardenv
 
 
-class baby():
+class Baby():
     def __init__(self):
-        # define environment object
-        self.env = cardenv()
         # states = env.observation_space.shape()
         self.states = 6
         # actions = env.action_space.n()
@@ -42,18 +40,18 @@ class baby():
         return dqn
 
 def make_and_verify_guess(user_hand, agent_hand, claim, dqn):
-    env = cardenv()
+    env = Cardenv()
     # incrementally train model given some user input
     env.user_hand = user_hand
     env.state[0:3,:] = agent_hand
-    env.state[3:,:] = claim  # placeholder: call function to generate user input for claim
+    env.state[3:,0] = claim  # placeholder: call function to generate user input for claim
 
     # play one round
-    scores = dqn.test(env, nb_episodes=1, visualize=False)
+    scores = dqn.test(env, nb_episodes=1, visualize=False, verbose = 0)
     guess =  bool(env.guess)
 
     # learn
-    dqn.fit(env, nb_steps= 1, visualize=False, verbose=1) # nb_steps was 5000
-    print('right or wrong: ', scores.history['episode_reward'])
-    # placeholder: some record keeper
+    dqn.fit(env, nb_steps= 1, visualize=False, verbose=0) # nb_steps was 5000
+    # print('right or wrong: ', scores.history['episode_reward'])
+
     return dqn, guess

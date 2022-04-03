@@ -1,5 +1,5 @@
 import random
-from nn import baby, make_and_verify_guess # :)
+from nn import Baby, make_and_verify_guess # :)
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 import util
@@ -57,7 +57,7 @@ class BSGame:
         return False
 
     def __str__(self):
-        return cards_to_str(self.__player1_cards) + cards_to_str(self.__player2_cards)
+        return util.cards_to_str(self.__player1_cards) + util.cards_to_str(self.__player2_cards)
 
 
 def play_one_round(agent):
@@ -70,7 +70,7 @@ def play_one_round(agent):
     print(util.cards_to_str(new_game.get_player1_hands()))
 
     print('Enter your claim')
-    
+
     #ask for claim card
     while True:
         try:
@@ -123,19 +123,19 @@ def play_one_round(agent):
     print(new_game)
 
     #result
-    result = new_game.judge_bs(claim_card, claim_quantity, claim_type)
+    result = new_game.judge_bs()
     if result == player2_move:
         score1 = 0
-        score2 = 6 - claim_quantity
+        score2 = 6 - new_game.claim_quantity
         print('\nPlayer 2 wins {} points!'.format(score2))
 
     else:
-        score1 = claim_quantity
+        score1 = new_game.claim_quantity
         score2 = 0
         print('\nPlayer 1 wins {} points!'.format(score1))
     print('\n\n')
 
-    return agent, (score1, score2)
+    return agent, score1, score2
 
 def main():
     print("\nLet's play BS Poker!\n")
@@ -143,7 +143,7 @@ def main():
     score_p2 = 0
     cont = 'Y'
     # build and compile
-    baby_object = baby()
+    baby_object = Baby()
     model = baby_object.build_model()
     agent = baby_object.build_agent()
     agent.compile(Adam(lr=1e-3), metrics=['mae']) #mean absolute error
