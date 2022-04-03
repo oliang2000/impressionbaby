@@ -22,23 +22,24 @@ def cards_to_str(cards):
 
 
 class Cards:
-    def __init__(self):
+    def __init__(self, n_draw):
         self.deck = [(card, suit) for card in cards for suit in suits]
+        self.n_draw = n_draw
         self.__player1_cards = None
         self.__player2_cards = None
 
-    def draw_from_deck_wo_replacement(self, n):
+    def draw_from_deck_wo_replacement(self):
         newdeck = []
-        for i in range(n):
+        for i in range(self.n_draw):
             index = random.randint(0, len(self.deck)-1)
             card = self.deck[index]
             self.deck.pop(index)
             newdeck.append(card)
         return newdeck
 
-    def deal(self, n):
-        self.__player1_cards = self.draw_from_deck_wo_replacement(n)
-        self.__player2_cards = self.draw_from_deck_wo_replacement(n)
+    def deal(self):
+        self.__player1_cards = self.draw_from_deck_wo_replacement()
+        self.__player2_cards = self.draw_from_deck_wo_replacement()
 
     def show_player1_hands(self):
         print(cards_to_str(self.__player1_cards))
@@ -47,13 +48,25 @@ class Cards:
         '''
         Strategy for guessing True or False.
         '''
-        # n_i_have = 
-        # possibility = 
-        if claim_quantity > 2:
-            return False
-        else:
+        #if player 2 has the claimed card(s)
+        n_player2_have = 0
+        for card, suit in self.__player2_cards:
+            if (card == claim_card) or (card == 2):
+                n_player2_have += 1
+        if claim_quantity <= n_player2_have:
             return True
-
+        #else guess by probability
+        else:
+            n_cards_needed = claim_quantity-n_player2_have
+            possibility = 1
+            i = 0
+            while i < n_cards_needed:
+                possibility *= (8-n_player2_have-i)/(52-3-i)
+                i += 1
+            if possibility > 0.1: 
+                return True
+            else:
+                return False
 
     def judge_bs(self, claim_card, claim_quantity):
         '''
@@ -70,29 +83,21 @@ class Cards:
     def __str__(self):
         return cards_to_str(self.__player1_cards) + cards_to_str(self.__player2_cards)
 
-
-def main():
-    print("\nLet's play BS Poker!\n")
-    new_cards = Cards()
-    new_cards.deal(3)
+def play_one_round():
+    '''
+    One round of guessing.
+    '''
+    new_cards = Cards(3)
+    new_cards.deal()
     print("Your hand:")
     new_cards.show_player1_hands()
 
-    #multi-round
-    # while True:
-    #     bs = input('Guess hand (0) or bullshit (1)?')
-    #     if bs:
-    #         break
-    #     else:
-    #         claim_card = input("Enter your claim (A23456789JQK):")
-    #         claim_quantity = input("Quantity of {}s (1-6):".format(claim_card))
-
-    #single round
     print('Enter your claim')
     #ask for claim card
     while True:
         try:
-            claim_card = inv_cards_dict[input("Card (A23456789JQK): ").upper()]
+            claim_card_input = input("Card (A23456789JQK): ").upper()
+            claim_card = inv_cards_dict[claim_card_input]
         except KeyError:
             print("Invalid value.")
             continue
@@ -101,7 +106,7 @@ def main():
     #ask for claim number
     while True:
         try:
-            claim_quantity = int(input("Quantity of {}s (1-6): ".format(claim_card)))
+            claim_quantity = int(input("Quantity of {}s (1-6): ".format(claim_card_input)))
         except ValueError:
             print("Invalid value.")
             continue
@@ -122,11 +127,30 @@ def main():
     #result
     result = new_cards.judge_bs(claim_card, claim_quantity)
     if result == player2_move:
-        print('\nPlayer 2 wins {} points!'.format(7 - claim_quantity))
+        score1 = 0
+        score2 = 6 - claim_quantity
+        print('\nPlayer 2 wins {} points!'.format(score2))
+
     else:
-        print('\nPlayer 1 wins {} points!'.format(claim_quantity))
+        score1 = claim_quantity
+        score2 = 0
+        print('\nPlayer 1 wins {} points!'.format(score1))
     print('\n\n')
 
+    return (score1, score2)
+
+def main():
+    print("\nLet's play BS Poker!\n")
+    score_p1 = 0
+    score_p2 = 0
+    cont = 'Y'
+    while cont.upper() == 'Y':
+        score1, score2 = play_one_round()
+        score_p1 += score1
+        score_p2 += score2
+        print('Player 1: {} points.'.format(score_p1))
+        print('Player 2: {} points.'.format(score_p2))
+        cont = input('Replay? (Y/N)\n')
 
 
 if __name__ == "__main__":
