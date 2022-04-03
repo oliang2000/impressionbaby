@@ -20,7 +20,6 @@ def cards_to_str(cards):
     return s
 
 
-
 class Cards:
     def __init__(self, n_draw):
         self.deck = [(card, suit) for card in cards for suit in suits]
@@ -82,6 +81,7 @@ class Cards:
 
     def __str__(self):
         return cards_to_str(self.__player1_cards) + cards_to_str(self.__player2_cards)
+
 
 def play_one_round():
     '''
@@ -155,5 +155,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
