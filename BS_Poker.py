@@ -43,40 +43,65 @@ class Cards:
     def show_player1_hands(self):
         print(cards_to_str(self.__player1_cards))
 
-    def play_bs(self, claim_card, claim_quantity):
+    def play_bs(self, claim_card, claim_quantity, claim_type):
         '''
         Strategy for guessing True or False.
         '''
-        #if player 2 has the claimed card(s)
-        n_player2_have = 0
-        for card, suit in self.__player2_cards:
-            if (card == claim_card) or (card == 2):
-                n_player2_have += 1
-        if claim_quantity <= n_player2_have:
-            return True
-        #else guess by probability
-        else:
-            n_cards_needed = claim_quantity-n_player2_have
-            possibility = 1
-            i = 0
-            while i < n_cards_needed:
-                possibility *= (8-n_player2_have-i)/(52-3-i)
-                i += 1
-            if possibility > 0.1: 
+        if claim_type == 0:
+            #if player 2 has the claimed card(s)
+            n_player2_have = 0
+            for card, suit in self.__player2_cards:
+                if (card == claim_card) or (card == 2):
+                    n_player2_have += 1
+            if claim_quantity <= n_player2_have:
                 return True
+            #else guess by probability
             else:
-                return False
+                n_cards_needed = claim_quantity-n_player2_have
+                possibility = 1
+                i = 0
+                while i < n_cards_needed:
+                    possibility *= (8-n_player2_have-i)/(52-3-i)
+                    i += 1
+                if possibility > 0.1: 
+                    return True
 
-    def judge_bs(self, claim_card, claim_quantity):
+        elif claim_type == 1:
+            #if player 2 has the claimed card(s)
+            n_player2_have = 0
+            for card, suit in self.__player2_cards:
+                if (suit == claim_card) or (card == 2):
+                    n_player2_have += 1
+            if claim_quantity <= n_player2_have:
+                return True
+            #else guess by probability
+            else:
+                n_cards_needed = claim_quantity-n_player2_have
+                possibility = 1
+                i = 0
+                while i < n_cards_needed:
+                    possibility *= (16-n_player2_have-i)/(52-3-i)
+                    i += 1
+                if possibility > 0.1: 
+                    return True
+        
+        return False ##
+
+
+    def judge_bs(self, claim_card, claim_quantity, claim_type):
         '''
         Judge if claim is right.
         '''
         number_of_claim_card = 0
         for card, suit in self.__player1_cards + self.__player2_cards:
-            if (card == claim_card) or (card == 2):
-                number_of_claim_card += 1
-                if claim_quantity == number_of_claim_card:
-                    return True
+            if claim_type == 0:
+                if (card == claim_card) or (card == 2):
+                    number_of_claim_card += 1
+            else:
+                if (suit == claim_card) or (card == 2):
+                    number_of_claim_card += 1
+            if claim_quantity == number_of_claim_card:
+                return True
         return False
 
     def __str__(self):
@@ -96,13 +121,31 @@ def play_one_round():
     #ask for claim card
     while True:
         try:
-            claim_card_input = input("Card (A23456789JQK): ").upper()
-            claim_card = inv_cards_dict[claim_card_input]
+            claim_type = int(input("Card (0) or Suit(1): "))
+        except ValueError:
+            print("Invalid value.")
+            continue
+        else:
+            if (claim_type == 0) or (claim_type == 1):
+                break
+            else:
+                print("Invalid value.")
+
+    while True:
+        inv_dict = inv_suits_dict
+        input_q = "Suit(HEART/CLUB/DIAMOND/SPADE): "
+        if claim_type == 0:
+            inv_dict = inv_cards_dict
+            input_q = "Card (A23456789JQK): "
+        try:
+            claim_card_input = input(input_q).upper()
+            claim_card = inv_dict[claim_card_input]
         except KeyError:
             print("Invalid value.")
             continue
         else:
             break
+
     #ask for claim number
     while True:
         try:
@@ -117,7 +160,7 @@ def play_one_round():
                 break
 
     #player 2 judges
-    player2_move = new_cards.play_bs(claim_card, claim_quantity)
+    player2_move = new_cards.play_bs(claim_card, claim_quantity, claim_type)
     print('\nPlayer 2 thinks its', str(player2_move))
 
     #show hands
@@ -125,7 +168,7 @@ def play_one_round():
     print(new_cards)
 
     #result
-    result = new_cards.judge_bs(claim_card, claim_quantity)
+    result = new_cards.judge_bs(claim_card, claim_quantity, claim_type)
     if result == player2_move:
         score1 = 0
         score2 = 6 - claim_quantity
@@ -150,9 +193,9 @@ def main():
         score_p2 += score2
         print('Player 1: {} points.'.format(score_p1))
         print('Player 2: {} points.'.format(score_p2))
-        cont = input('Replay? (Y/N)\n')
+        cont = input('Replay (Y/N)? ')
+        print('\n\n')
 
 
 if __name__ == "__main__":
     main()
-
