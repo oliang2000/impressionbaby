@@ -77,18 +77,19 @@ class App:
             self.bsgame.claim_type = 2
 
         #claiming cards
-        if self.bsgame.claim_type == 1:
-            if pyxel.btnp(pyxel.KEY_1):
-                self.bsgame.claim_card = 1 #####2
-        elif self.bsgame.claim_type == 2:
-            if pyxel.btnp(pyxel.KEY_H):
-                self.bsgame.claim_card = 0
-            if pyxel.btnp(pyxel.KEY_C):
-                self.bsgame.claim_card = 1
-            if pyxel.btnp(pyxel.KEY_D):
-                self.bsgame.claim_card = 2
-            if pyxel.btnp(pyxel.KEY_S):
-                self.bsgame.claim_card = 3
+        if self.bsgame.claim_type:
+            if self.bsgame.claim_type == 1:
+                if pyxel.btnp(pyxel.KEY_1):
+                    self.bsgame.claim_card = 1 #####3
+            elif self.bsgame.claim_type == 2:
+                if pyxel.btnp(pyxel.KEY_H):
+                    self.bsgame.claim_card = 0
+                if pyxel.btnp(pyxel.KEY_C):
+                    self.bsgame.claim_card = 1
+                if pyxel.btnp(pyxel.KEY_D):
+                    self.bsgame.claim_card = 2
+                if pyxel.btnp(pyxel.KEY_S):
+                    self.bsgame.claim_card = 3
         ##3
 
     def update_gameover_scene(self):
@@ -141,6 +142,7 @@ class App:
         pyxel.blt(x + 30 + 3, y + 3, 0, suit_coords[2][0], suit_coords[2][1], 6, 6) #suit
         pyxel.text(x + 30 + 3 + 5, y + 3 + 5, str(card_vals[2]), 7) ###
 
+
     def draw_title_scene(self):
         pyxel.text(45, 30, "Impression Baby", pyxel.frame_count % 16)
         #graphics
@@ -166,7 +168,7 @@ class App:
             if self.bsgame.claim_card:
                 pyxel.text(10, 100, "Quantity of {}s (1-6):".format(CARDS_DICT[self.bsgame.claim_card]), 13) 
         elif self.bsgame.claim_type == 2:
-            pyxel.text(10, 90, "Suit(HEART/CLUB/DIAMOND/SPADE): ", 13)
+            pyxel.text(10, 90, "Suit(D/C/H/S): ", 13)
             if self.bsgame.claim_card:
                 pyxel.text(10, 100, "Quantity of {}s (1-6):".format(SUITS_DICT[self.bsgame.claim_card]), 13) 
 
