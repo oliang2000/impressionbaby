@@ -70,15 +70,17 @@ def play_one_round(agent):
     print(util.cards_to_str(new_game.get_player1_hands()))
 
     print('Enter your claim')
+    
     #ask for claim card
     while True:
         try:
-            claim_type = int(input("Card (0) or Suit(1): "))
+            input_claim_type = int(input("Card (1) or Suit(2): "))
         except ValueError:
             print("Invalid value.")
             continue
         else:
-            if (claim_type == 0) or (claim_type == 1):
+            if (input_claim_type == 1) or (input_claim_type == 2):
+                new_game.claim_type = input_claim_type
                 break
             else:
                 print("Invalid value.")
@@ -86,12 +88,12 @@ def play_one_round(agent):
     while True:
         inv_dict = INV_SUITS_DICT
         input_q = "Suit(HEART/CLUB/DIAMOND/SPADE): "
-        if claim_type == 0:
+        if new_game.claim_type == 1:
             inv_dict = INV_CARDS_DICT
             input_q = "Card (A23456789JQK): "
         try:
-            claim_card_input = input(input_q).upper()
-            claim_card = inv_dict[claim_card_input]
+            input_claim_card = input(input_q).upper()
+            new_game.claim_card = inv_dict[input_claim_card]
         except KeyError:
             print("Invalid value.")
             continue
@@ -101,14 +103,15 @@ def play_one_round(agent):
     #ask for claim number
     while True:
         try:
-            claim_quantity = int(input("Quantity of {}s (1-6): ".format(claim_card_input)))
+            input_claim_quantity = int(input("Quantity of {}s (1-6): ".format(input_claim_card)))
         except ValueError:
             print("Invalid value.")
             continue
         else:
-            if (claim_quantity > 6) or (claim_quantity <= 0):
+            if (input_claim_quantity > 6) or (input_claim_quantity <= 0):
                 print("Invalid value.")
             else:
+                new_game.claim_quantity = input_claim_quantity
                 break
 
     #player 2 judges
