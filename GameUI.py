@@ -1,10 +1,12 @@
 ##3: update play scene
+# click 1 or 2 changes the claim type and screen display
 
 import pyxel
 from BS_Poker import BSGame
 from textwrap import wrap
 import util
 from util import CARDS, CARDS_DICT, INV_CARDS_DICT, SUITS, SUITS_DICT, INV_SUITS_DICT
+from nn import Baby, make_and_verify_guess # :)
 
 SCREEN_W = 150
 SCREEN_L = 200
@@ -51,6 +53,11 @@ class App:
         #import title page image
         pyxel.load("assets/poker_vectors.pyxres")
         pyxel.run(self.update, self.draw)
+        #initialize agent
+        baby_object = Baby()
+        model = baby_object.build_model()
+        agent = baby_object.build_agent()
+        agent.compile(Adam(lr=1e-3), metrics=['mae']) #mean absolute error
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
@@ -90,6 +97,22 @@ class App:
                     self.bsgame.claim_card = 2
                 if pyxel.btnp(pyxel.KEY_S):
                     self.bsgame.claim_card = 3
+         
+         #claim quantity
+        if self.bsgame.claim_card:
+            if pyxel.btnp(pyxel.KEY_1):
+                self.bsgame.claim_quantity = 1
+            if pyxel.btnp(pyxel.KEY_2):
+                self.bsgame.claim_quantity = 2
+            if pyxel.btnp(pyxel.KEY_3):
+                self.bsgame.claim_quantity = 3
+            if pyxel.btnp(pyxel.KEY_4):
+                self.bsgame.claim_quantity = 4
+            if pyxel.btnp(pyxel.KEY_5):
+                self.bsgame.claim_quantity = 5
+            if pyxel.btnp(pyxel.KEY_6):
+                self.bsgame.claim_quantity = 6
+
         ##3
 
     def update_gameover_scene(self):
@@ -124,23 +147,36 @@ class App:
             hand = self.bsgame.get_player1_hands()
         elif player_n == 2:
             hand = self.bsgame.get_player2_hands()
-        suit_coords = []
-        card_vals = []
+
         for p_card in hand:
-            suit_coords.append(SUIT_POSITIONS[p_card[1]])
-            card_vals.append(CARDS_DICT[p_card[0]])
+            suit_coords = SUIT_POSITIONS[p_card[1]]
+            card_val = (CARDS_DICT[p_card[0]])
+            pyxel.blt(x, y, 0, 16, 16, 16, 16)
+            pyxel.blt(x + 3, y + 2, 0, suit_coords[0], suit_coords[1], 6, 6) #card suit 
+            #card number
+            i = 2
+            if card_val == 10:
+                i = 0
+            pyxel.text(x + 8 + i, y + 8, card_val, 7) 
+            x += 20
 
-        pyxel.blt(x, y, 0, 16, 16, 16, 16)
-        pyxel.blt(x + 3, y + 3, 0, suit_coords[0][0], suit_coords[0][1], 6, 6) #suit
-        pyxel.text(x + 3 + 5, y + 3 + 5, str(card_vals[0]), 7) 
+        # suit_coords = []
+        # card_vals = []
+        # for p_card in hand:
+        #     suit_coords.append(SUIT_POSITIONS[p_card[1]])
+        #     card_vals.append(CARDS_DICT[p_card[0]])
 
-        pyxel.blt(x + 15, y, 0, 16, 16, 16, 16)
-        pyxel.blt(x + 15 + 3, y + 3, 0, suit_coords[1][0], suit_coords[1][1], 6, 6) #suit
-        pyxel.text(x + 15 + 3 + 5, y + 3 + 5, str(card_vals[1]), 7) ###
+        # pyxel.blt(x, y, 0, 16, 16, 16, 16)
+        # pyxel.blt(x + 3, y + 3, 0, suit_coords[0][0], suit_coords[0][1], 6, 6) #suit
+        # pyxel.text(x + 3 + 5, y + 3 + 5, str(card_vals[0]), 7) 
 
-        pyxel.blt(x + 30, y, 0, 16, 16, 16, 16)
-        pyxel.blt(x + 30 + 3, y + 3, 0, suit_coords[2][0], suit_coords[2][1], 6, 6) #suit
-        pyxel.text(x + 30 + 3 + 5, y + 3 + 5, str(card_vals[2]), 7) ###
+        # pyxel.blt(x + 15, y, 0, 16, 16, 16, 16)
+        # pyxel.blt(x + 15 + 3, y + 3, 0, suit_coords[1][0], suit_coords[1][1], 6, 6) #suit
+        # pyxel.text(x + 15 + 3 + 5, y + 3 + 5, str(card_vals[1]), 7) ###
+
+        # pyxel.blt(x + 30, y, 0, 16, 16, 16, 16)
+        # pyxel.blt(x + 30 + 3, y + 3, 0, suit_coords[2][0], suit_coords[2][1], 6, 6) #suit
+        # pyxel.text(x + 30 + 3 + 5, y + 3 + 5, str(card_vals[2]), 7) ###
 
 
     def draw_title_scene(self):
