@@ -1,9 +1,23 @@
+# to do
+# suppress certain warnings
+
 import random
 from nn import Baby, make_and_verify_guess # :)
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 import util
 from util import CARDS, CARDS_DICT, INV_CARDS_DICT, SUITS, SUITS_DICT, INV_SUITS_DICT
+
+
+# suppress all warnings
+import warnings
+warnings.filterwarnings("ignore")
+# silence tensorflow
+import logging
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
+logging.getLogger('tensorflow').setLevel(logging.FATAL)
+
 
 
 class BSGame:
